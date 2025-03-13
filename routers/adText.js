@@ -1,5 +1,6 @@
 const express = require('express');
 const { OpenAI } = require('openai');
+const openai = require('../openai');
 const router = express.Router();
 const pool = require('../db');
 
@@ -22,6 +23,24 @@ router.post('/generate', async (req, res) => {
         res.status(500).json({ error: 'Error generating ad text' });
     }
 
+});
+
+router.post('/generate-response', async (req, res) => {
+    const { userInput } = req.body;
+
+    try {
+        const completion = await openai.createCompletion({
+            model: 'text-davinci-003',
+            prompt: userInput,
+            max_tokens: 150
+        });
+
+        const aiResponse = completion.data.choices[0].text.trim();
+        res.json({ response: aiResponse });
+    } catch (error) {
+        console.error('Error generating response:', error);
+        res.status(500).json({ error: 'Error generating response' });
+    }
 });
 
 router.get('/users', async (req, res) => {
